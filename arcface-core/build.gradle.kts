@@ -6,6 +6,8 @@ plugins {
     signing
 }
 
+version = "1.0.0"
+
 android {
     namespace = "com.appliedrec.verid3.facerecognition.arcface.core"
     compileSdk = 35
@@ -68,7 +70,6 @@ publishing {
         create<MavenPublication>("release") {
             groupId = "com.appliedrec.verid3"
             artifactId = "face-recognition-arcface-core"
-            version = "1.0.0"
             afterEvaluate {
                 from(components["release"])
             }
