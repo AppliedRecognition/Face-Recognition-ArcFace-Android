@@ -1,7 +1,6 @@
 #include <jni.h>
 #include <string>
 #include <android/bitmap.h>
-#include <android/log.h>
 #include "RotatedBox.h"
 #include "FaceAlignment.h"
 #include "AffineMatrix.h"
@@ -27,14 +26,9 @@ std::vector<float> cropAlignToTensor(JNIEnv* env, jobject bitmap, const RotatedB
 
     std::vector<float> tensor(1 * 3 * outH * outW, 0.0f); // [1, 3, 112, 112]
 
-    __android_log_print(ANDROID_LOG_INFO, "Ver-ID", "Rotated box centre: [x: %.02f, y: %.02f], angle: %.02f, scale: %.02f", box.center.x, box.center.y, box.angle, box.width);
-
     double scale = outW / box.width;
     AffineMatrix matrix = buildTransform(box.center, box.angle, box.width, outW, outH);
     AffineMatrix invMatrix = invert(matrix);
-
-    __android_log_print(ANDROID_LOG_INFO, "Ver-ID", "Matrix a: %.02f, b: %.02f, tx: %.02f, c: %.02f, d: %.02f, ty: %.02f", matrix.m[0][0], matrix.m[0][1], matrix.m[0][2], matrix.m[1][0], matrix.m[1][1], matrix.m[1][2]);
-    __android_log_print(ANDROID_LOG_INFO, "Ver-ID", "Inverted matrix a: %.02f, b: %.02f, tx: %.02f, c: %.02f, d: %.02f, ty: %.02f", invMatrix.m[0][0], invMatrix.m[0][1], invMatrix.m[0][2], invMatrix.m[1][0], invMatrix.m[1][1], invMatrix.m[1][2]);
 
     for (int y = 0; y < outH; ++y) {
         for (int x = 0; x < outW; ++x) {
