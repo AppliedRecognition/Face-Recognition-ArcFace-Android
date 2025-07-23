@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.appliedrec.verid3.facerecognition.arcface.cloud">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application>
+        <meta-data
+            android:name="com.appliedrec.facerecognitionarcface.serverurl"
+            android:value="https://itnlej3459.execute-api.us-east-1.amazonaws.com/Prod/extract_face_templates" />
+        <meta-data
+            android:name="com.appliedrec.facerecognitionarcface.apikey"
+            android:value="BK1aJ1vpb08InLtOsdmhL6ZiRDJtq0H89nPqVuzB" />
+    </application>
+</manifest>

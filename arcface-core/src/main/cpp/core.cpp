@@ -104,24 +104,22 @@ std::vector<Point> pointVectorFromObject(JNIEnv *env, jobjectArray points) {
     }
     return pointVec;
 }
-
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_appliedrec_verid3_facerecognition_arcface_core_FaceAlignment_alignFace(JNIEnv *env,
-                                                                             jobject thiz,
-                                                                             jobject image,
-                                                                             jobject left_eye,
-                                                                             jobject right_eye,
-                                                                             jobject nose_tip,
-                                                                             jobject mouth_centre) {
-    jclass pointClass = env->GetObjectClass(left_eye);
+Java_com_appliedrec_verid3_facerecognition_arcface_core_FaceAlignment_alignFace(
+        JNIEnv *env, jobject thiz, jobject image, jobjectArray landmarks) {
+    int landmarkCount = env->GetArrayLength(landmarks);
+    if (landmarkCount < 4 || landmarkCount > 5) {
+        throw std::runtime_error("Invalid number of face landmarks");
+    }
+    jclass pointClass = env->FindClass("android/graphics/PointF");
     jfieldID xFieldId = env->GetFieldID(pointClass, "x", "F");
     jfieldID yFieldId = env->GetFieldID(pointClass, "y", "F");
-    std::vector<Point> points(4);
-    points[0] = Point{env->GetFloatField(left_eye, xFieldId), env->GetFloatField(left_eye, yFieldId)};
-    points[1] = Point{env->GetFloatField(right_eye, xFieldId), env->GetFloatField(right_eye, yFieldId)};
-    points[2] = Point{env->GetFloatField(nose_tip, xFieldId), env->GetFloatField(nose_tip, yFieldId)};
-    points[3] = Point{env->GetFloatField(mouth_centre, xFieldId), env->GetFloatField(mouth_centre, yFieldId)};
+    std::vector<Point> points(landmarkCount);
+    for (int i=0; i<landmarkCount; i++) {
+        jobject pt = env->GetObjectArrayElement(landmarks, i);
+        points[i] = Point{env->GetFloatField(pt, xFieldId), env->GetFloatField(pt, yFieldId)};
+    }
     RotatedBox rotatedBox = alignFace(points);
     std::vector<float> inputTensor = cropAlignToTensor(env, image, rotatedBox);
 

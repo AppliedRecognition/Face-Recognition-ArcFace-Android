@@ -2,8 +2,11 @@ package com.appliedrec.verid3.facerecognition.arcface.core
 
 import android.graphics.BitmapFactory
 import android.graphics.PointF
+import android.graphics.RectF
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.appliedrec.verid3.common.EulerAngle
+import com.appliedrec.verid3.common.Face
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,9 +36,17 @@ class FaceRecognitionTest {
         val rightEye = PointF(371.93054f, 400.8451f)
         val mouthCentre = PointF(301.36154f, 568.8225f)
         val noseTip = PointF(296.47003f, 477.80737f)
-        InstrumentationRegistry.getInstrumentation().context.assets.open("Photo 04-05-2016, 18 57 50.png").use { inputStream ->
+        InstrumentationRegistry.getInstrumentation().context.assets
+            .open("Photo 04-05-2016, 18 57 50.png").use { inputStream ->
             val bitmap = BitmapFactory.decodeStream(inputStream)
-            val aligned = faceAlignment.alignFace(bitmap, leftEye, rightEye, noseTip, mouthCentre)
+            val face = Face(
+                RectF(100f, 100f, 200f, 200f),
+                EulerAngle(0f, 0f, 0f),
+                10f,
+                arrayOf(leftEye, rightEye, noseTip, mouthCentre),
+                leftEye, rightEye, noseTip, mouthCentre
+            )
+            val aligned = faceAlignment.alignFace(bitmap, face)
             assertEquals(112, aligned.width)
             assertEquals(112, aligned.height)
         }

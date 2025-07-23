@@ -1,7 +1,11 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.dokka)
     `maven-publish`
     signing
 }
@@ -10,13 +14,17 @@ version = "1.0.0"
 
 android {
     namespace = "com.appliedrec.verid3.facerecognition.arcface.cloud"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+    }
+
+    publishing {
+        singleVariant("release") {}
     }
 
     buildTypes {
@@ -32,8 +40,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
     }
 }
 
@@ -103,4 +113,9 @@ publishing {
 signing {
     useGpgCmd()
     sign(publishing.publications["release"])
+}
+
+tasks.withType<DokkaTask>().configureEach {
+    moduleName.set("Face recognition ArcFace")
+    moduleVersion.set(project.version.toString())
 }

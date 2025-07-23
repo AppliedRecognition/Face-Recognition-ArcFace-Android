@@ -6,17 +6,15 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.appliedrec.verid3.common.Face
 import com.appliedrec.verid3.common.Image
 import com.appliedrec.verid3.common.serialization.fromBitmap
-import com.appliedrec.verid3.facedetection.mp.FaceDetection
-import com.appliedrec.verid3.facerecognition.arcface.core.FaceRecognitionTemplate
+import com.appliedrec.verid3.facedetection.retinaface.FaceDetectionRetinaFace
+import com.appliedrec.verid3.facerecognition.arcface.core.FaceTemplateArcFace
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -36,23 +34,28 @@ import kotlin.random.Random
 class FaceRecognitionTest {
 
     private lateinit var mockWebServer: MockWebServer
-    private lateinit var faceDetection: FaceDetection
+    private lateinit var faceDetection: FaceDetectionRetinaFace
 
-    private fun createFaceRecognition(mockWebServer: MockWebServer? = null): FaceRecognition {
+    private fun createFaceRecognition(mockWebServer: MockWebServer? = null): FaceRecognitionArcFace {
         return mockWebServer?.let { server ->
-            FaceRecognition(server.url("/"), "api_token")
+            FaceRecognitionArcFace("api_token", server.url("/"))
         } ?: run {
             val context = InstrumentationRegistry.getInstrumentation().context
             val config = context.assets.open("config.json").use { inputStream ->
                 Json.decodeFromString<Config>(inputStream.reader().readText())
             }
-            FaceRecognition(config.url.toHttpUrl(), config.apiKey)
+            FaceRecognitionArcFace(config.apiKey,config.url.toHttpUrl())
         }
     }
 
     @Before
-    fun setup() {
-        faceDetection = FaceDetection(InstrumentationRegistry.getInstrumentation().context)
+    fun setup() = runBlocking {
+        faceDetection = FaceDetectionRetinaFace.create(InstrumentationRegistry.getInstrumentation().context)
+    }
+
+    @After
+    fun tearDown() = runBlocking {
+        faceDetection.close()
     }
 
     @Test
@@ -60,7 +63,7 @@ class FaceRecognitionTest {
         mockWebServer = MockWebServer()
         mockWebServer.start()
         val faceRecognition = createFaceRecognition(mockWebServer)
-        val fakeTemplate = FaceRecognitionTemplate(generateRandomFaceTemplate())
+        val fakeTemplate = FaceTemplateWrapper(FaceTemplateArcFace(generateRandomFaceTemplate()))
         val body = Json.encodeToString(arrayOf(fakeTemplate))
         mockWebServer.enqueue(
             MockResponse()
@@ -83,11 +86,11 @@ class FaceRecognitionTest {
 
     @Test
     fun identifyUserInFace(): Unit = runBlocking {
-        val challengeFace = FaceRecognitionTemplate(generateRandomFaceTemplate())
-        val users: Array<Pair<String, FaceRecognitionTemplate>> = arrayOf(
-            "user1" to FaceRecognitionTemplate(generateRandomFaceTemplate()),
-            "user2" to FaceRecognitionTemplate(generateFaceTemplateSimilarTo(challengeFace.data, 0.8f)),
-            "user3" to FaceRecognitionTemplate(generateRandomFaceTemplate()),
+        val challengeFace = FaceTemplateArcFace(generateRandomFaceTemplate())
+        val users: Array<Pair<String, FaceTemplateArcFace>> = arrayOf(
+            "user1" to FaceTemplateArcFace(generateRandomFaceTemplate()),
+            "user2" to FaceTemplateArcFace(generateFaceTemplateSimilarTo(challengeFace.data, 0.8f)),
+            "user3" to FaceTemplateArcFace(generateRandomFaceTemplate()),
         )
         val threshold = 0.5f
         // 1. Create FaceRecognition instance

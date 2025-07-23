@@ -6,13 +6,14 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlin.math.sqrt
 
-abstract class FaceRecognitionCore : FaceRecognition<FaceRecognitionTemplate> {
+abstract class FaceRecognitionArcFaceCore : FaceRecognition<FaceTemplateVersionV24, FloatArray> {
+
+    override val version: FaceTemplateVersionV24 = FaceTemplateVersionV24
 
     override suspend fun compareFaceRecognitionTemplates(
-        faceRecognitionTemplates: Array<FaceRecognitionTemplate>,
-        template: FaceRecognitionTemplate
+        faceRecognitionTemplates: Array<FaceTemplateArcFace>,
+        template: FaceTemplateArcFace
     ): FloatArray = coroutineScope {
-        require(faceRecognitionTemplates.all { it.version == template.version }) { "Face recognition templates must be of the same version" }
         require(faceRecognitionTemplates.all { it.data.size == template.data.size }) { "Face recognition templates must have the same length" }
         val data1 = template.data
         val norm1 = norm(data1)

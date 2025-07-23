@@ -24,20 +24,20 @@
 
 ## Usage
 
-The library implements the [FaceRecognition](https://github.com/AppliedRecognition/Ver-ID-Common-Types-Android/blob/c54e87304c3c0119f471e558197bcaafebd13c74/lib/src/main/java/com/appliedrec/verid3/common/FaceRecognition.kt) interface from the Ver-ID-Common-Types package. This makes it compatible with the Ver-ID SDK.
+The library implements the [FaceRecognition](https://github.com/AppliedRecognition/Ver-ID-Common-Types-Android/blob/main/lib/src/main/java/com/appliedrec/verid3/common/FaceRecognition.kt) interface from the Ver-ID-Common-Types package. This makes it compatible with the Ver-ID SDK.
 
 ### Example: Create a face template from an image and face
 
-Use a class that implements the [FaceDetection](https://github.com/AppliedRecognition/Ver-ID-Common-Types-Android/blob/c54e87304c3c0119f471e558197bcaafebd13c74/lib/src/main/java/com/appliedrec/verid3/common/FaceDetection.kt) interface from the Ver-ID-Common-Types package. For example:
+Use a class that implements the [FaceDetection](https://github.com/AppliedRecognition/Ver-ID-Common-Types-Android/blob/main/lib/src/main/java/com/appliedrec/verid3/common/FaceDetection.kt) interface from the Ver-ID-Common-Types package. For example:
 
 ```kotlin
-implementation("com.appliedrec.verid3:face-detection-mp:1.0.0")
+implementation("com.appliedrec:verid3-face-detection-retinaface:1.0.0")
 ```
 
-To create an instance of [Image](https://github.com/AppliedRecognition/Ver-ID-Common-Types-Android/blob/c54e87304c3c0119f471e558197bcaafebd13c74/lib/src/main/java/com/appliedrec/verid3/common/Image.kt) import the Ver-ID serialization library by adding the following dependency:
+To create an instance of [Image](https://github.com/AppliedRecognition/Ver-ID-Common-Types-Android/blob/main/lib/src/main/java/com/appliedrec/verid3/common/Image.kt) import the Ver-ID serialization library by adding the following dependency:
 
 ```kotlin
-implementation("com.appliedrec.verid3:common-serialization:1.0.0")
+implementation("com.appliedrec:verid3-serialization:1.0.1")
 ```
 
 ```kotlin
@@ -45,7 +45,7 @@ suspend fun detectFacesForRecognition(
     context: Context, 
     uri: Uri, 
     faceDetection: FaceDetection
-): Array<FaceRecognitionTemplate> = coroutineScope {
+): Array<FaceTemplateArcFace> = coroutineScope {
     // 1. Read image from URL
     val bitmap = context.contentResolver.openInputStream(uri)
         .use(BitmapFactory::decodeStream)
@@ -54,7 +54,7 @@ suspend fun detectFacesForRecognition(
     // 3. Detect up to 5 faces
     val faces = faceDetection.detectFacesInImage(image, 5)
     // 4. Create face recognition instance
-    val templates = FaceRecognition(context).use {
+    val templates = FaceRecognitionArcFace(context).use {
         // 5. Extract face templates
         it.createFaceRecognitionTemplates(faces, image) 
     }
@@ -69,18 +69,18 @@ In this example, we have a population with face templates registered for differe
 
 ```kotlin
 suspend fun identifyUserInFace(
-   serverUrl: HttpUrl,
-   apiToken: String,
-   challengeFace: FaceRecognitionTemplate, 
-   users: Array<Pair<String,FaceRecognitionTemplate>>, 
+   context: Context,
+   challengeFace: FaceTemplateArcFace, 
+   users: Array<Pair<String,FaceTemplateArcFace>>, 
    threshold: Float = 0.5f
 ): LinkedHashMap<String,Float> = coroutineScope {
-   // 1. Create FaceRecognition instance
-   val faceRecognition = FaceRecognition(serverUrl, apiToken)
-   // 2. Compare registered user faces to the challenge face
-   val scores = faceRecognition.compareFaceRecognitionTemplates(
-      users.map { it.second }.toTypedArray(), challengeFace
-   )
+   // 1. Create FaceRecognitionArcFace instance
+   val scores = FaceRecognitionArcFace(context).use { faceRecognition ->
+       // 2. Compare registered user faces to the challenge face
+       faceRecognition.compareFaceRecognitionTemplates(
+          users.map { it.second }.toTypedArray(), challengeFace
+       )
+   }
    // 3. Return users with scores matching or exceeding the threshold
    scores
       .asList() // Convert scores array to list
