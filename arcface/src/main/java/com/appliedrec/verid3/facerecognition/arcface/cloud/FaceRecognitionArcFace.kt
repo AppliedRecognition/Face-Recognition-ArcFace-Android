@@ -4,11 +4,13 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import com.appliedrec.verid3.common.Face
+import com.appliedrec.verid3.common.FaceTemplate
 import com.appliedrec.verid3.common.IImage
 import com.appliedrec.verid3.common.serialization.toBitmap
 import com.appliedrec.verid3.facerecognition.arcface.core.FaceAlignment
 import com.appliedrec.verid3.facerecognition.arcface.core.FaceRecognitionArcFaceCore
 import com.appliedrec.verid3.facerecognition.arcface.core.FaceTemplateArcFace
+import com.appliedrec.verid3.facerecognition.arcface.core.FaceTemplateVersionV24
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -52,9 +54,9 @@ class FaceRecognitionArcFace(val apiToken: String, val serverUrl: HttpUrl) : Fac
     private val httpClient = OkHttpClient()
 
     override suspend fun createFaceRecognitionTemplates(
-        faces: Array<Face>,
+        faces: List<Face>,
         image: IImage
-    ): Array<FaceTemplateArcFace> = withContext(Dispatchers.IO) {
+    ): List<FaceTemplate<FaceTemplateVersionV24, FloatArray>> = withContext(Dispatchers.IO) {
         val bitmap = image.toBitmap()
         val imageList = faces.map { face ->
             require(face.noseTip != null && face.mouthLeftCorner != null && face.mouthRightCorner != null)
@@ -73,8 +75,7 @@ class FaceRecognitionArcFace(val apiToken: String, val serverUrl: HttpUrl) : Fac
             }
             response.body.string()
         }
-        val wrapper = Json.decodeFromString<Array<FaceTemplateWrapper>>(body)
-        return@withContext wrapper.map { it.faceTemplate }.toTypedArray()
+        Json.decodeFromString<List<FaceTemplateArcFace>>(body)
     }
 
     private fun bitmapToJpeg(bitmap: Bitmap): ByteArray {

@@ -63,7 +63,7 @@ class FaceRecognitionTest {
         mockWebServer = MockWebServer()
         mockWebServer.start()
         val faceRecognition = createFaceRecognition(mockWebServer)
-        val fakeTemplate = FaceTemplateWrapper(FaceTemplateArcFace(generateRandomFaceTemplate()))
+        val fakeTemplate = FaceTemplateArcFace(generateRandomFaceTemplate())
         val body = Json.encodeToString(arrayOf(fakeTemplate))
         mockWebServer.enqueue(
             MockResponse()
@@ -71,7 +71,7 @@ class FaceRecognitionTest {
                 .addHeader("Content-Type", "application/json")
         )
         val (image, face) = createTestImageAndFace()
-        val template = faceRecognition.createFaceRecognitionTemplates(arrayOf(face), image).first()
+        val template = faceRecognition.createFaceRecognitionTemplates(listOf(face), image).first()
         assertEquals(128, template.data.size)
         mockWebServer.shutdown()
     }
@@ -80,7 +80,7 @@ class FaceRecognitionTest {
     fun testExtractFaceTemplateInCloud(): Unit = runBlocking {
         val faceRecognition = createFaceRecognition()
         val (image, face) = createTestImageAndFace()
-        val template = faceRecognition.createFaceRecognitionTemplates(arrayOf(face), image).first()
+        val template = faceRecognition.createFaceRecognitionTemplates(listOf(face), image).first()
         assertEquals(128, template.data.size)
     }
 
@@ -97,7 +97,7 @@ class FaceRecognitionTest {
         val faceRecognition = createFaceRecognition()
         // 2. Compare registered user faces to the challenge face
         val scores = faceRecognition.compareFaceRecognitionTemplates(
-            users.map { it.second }.toTypedArray(), challengeFace
+            users.map { it.second }, challengeFace
         )
         // 3. Return users with scores matching or exceeding the threshold
         val result = scores

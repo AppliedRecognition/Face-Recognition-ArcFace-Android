@@ -67,8 +67,8 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("release") {
-            groupId = "com.appliedrec.verid3"
-            artifactId = "face-recognition-arcface-cloud"
+            groupId = "com.appliedrec"
+            artifactId = "verid3-face-recognition-arcface-cloud"
             afterEvaluate {
                 from(components["release"])
             }

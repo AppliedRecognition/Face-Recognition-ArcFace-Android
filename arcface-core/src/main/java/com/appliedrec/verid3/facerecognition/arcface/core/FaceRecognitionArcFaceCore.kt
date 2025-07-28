@@ -1,6 +1,7 @@
 package com.appliedrec.verid3.facerecognition.arcface.core
 
 import com.appliedrec.verid3.common.FaceRecognition
+import com.appliedrec.verid3.common.FaceTemplate
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -11,8 +12,8 @@ abstract class FaceRecognitionArcFaceCore : FaceRecognition<FaceTemplateVersionV
     override val version: FaceTemplateVersionV24 = FaceTemplateVersionV24
 
     override suspend fun compareFaceRecognitionTemplates(
-        faceRecognitionTemplates: Array<FaceTemplateArcFace>,
-        template: FaceTemplateArcFace
+        faceRecognitionTemplates: List<FaceTemplate<FaceTemplateVersionV24, FloatArray>>,
+        template: FaceTemplate<FaceTemplateVersionV24, FloatArray>
     ): FloatArray = coroutineScope {
         require(faceRecognitionTemplates.all { it.data.size == template.data.size }) { "Face recognition templates must have the same length" }
         val data1 = template.data
