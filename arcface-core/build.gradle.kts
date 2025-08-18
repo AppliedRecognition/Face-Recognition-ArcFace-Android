@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.dokka)
-    `maven-publish`
+    alias(libs.plugins.vanniktech.publish)
     signing
 }
 
@@ -33,10 +33,6 @@ android {
         }
     }
 
-    publishing {
-        singleVariant("release") {}
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -61,69 +57,51 @@ android {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    ndkVersion = "27.1.12297006"
+    ndkVersion = "28.2.13676358"
 }
 
 dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.verid.common)
+    api(libs.verid.common)
     implementation(libs.kotlin.serialization)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("release") {
-            groupId = "com.appliedrec"
-            artifactId = "verid3-face-recognition-arcface-core"
-            afterEvaluate {
-                from(components["release"])
-            }
-            pom {
-                name.set("ArcFace face recognition for Ver-ID")
-                description.set("Face recognition implementation for Ver-ID SDK using ArcFace model")
-                url.set("https://github.com/AppliedRecognition/Face-Recognition-ArcFace-Android")
-                licenses {
-                    license {
-                        name.set("Commercial")
-                        url.set("https://raw.githubusercontent.com/AppliedRecognition/Face-Recognition-ArcFace-Android/main/LICENCE.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("appliedrec")
-                        name.set("Applied Recognition")
-                        email.set("support@appliedrecognition.com")
-                    }
-                }
-                scm {
-                    connection.set("scm:git:git://github.com/AppliedRecognition/Face-Recognition-ArcFace-Android.git")
-                    developerConnection.set("scm:git:ssh://github.com/AppliedRecognition/Face-Recognition-ArcFace-Android.git")
-                    url.set("https://github.com/AppliedRecognition/Face-Recognition-ArcFace-Android")
-                }
+mavenPublishing {
+    coordinates("com.appliedrec", "face-recognition-arcface-core")
+    pom {
+        name.set("ArcFace face recognition for Ver-ID")
+        description.set("Face recognition implementation for Ver-ID SDK using ArcFace model")
+        url.set("https://github.com/AppliedRecognition/Face-Recognition-ArcFace-Android")
+        licenses {
+            license {
+                name.set("Commercial")
+                url.set("https://raw.githubusercontent.com/AppliedRecognition/Face-Recognition-ArcFace-Android/main/LICENCE.txt")
             }
         }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/AppliedRecognition/Ver-ID-Releases-Android")
-            credentials {
-                username = project.findProperty("gpr.user") as String?
-                password = project.findProperty("gpr.token") as String?
+        developers {
+            developer {
+                id.set("appliedrec")
+                name.set("Applied Recognition")
+                email.set("support@appliedrecognition.com")
             }
         }
+        scm {
+            connection.set("scm:git:git://github.com/AppliedRecognition/Face-Recognition-ArcFace-Android.git")
+            developerConnection.set("scm:git:ssh://github.com/AppliedRecognition/Face-Recognition-ArcFace-Android.git")
+            url.set("https://github.com/AppliedRecognition/Face-Recognition-ArcFace-Android")
+        }
     }
+    publishToMavenCentral(automaticRelease = true)
 }
 
 signing {
     useGpgCmd()
-    sign(publishing.publications["release"])
+    sign(publishing.publications)
 }
 
 tasks.withType<DokkaTask>().configureEach {
