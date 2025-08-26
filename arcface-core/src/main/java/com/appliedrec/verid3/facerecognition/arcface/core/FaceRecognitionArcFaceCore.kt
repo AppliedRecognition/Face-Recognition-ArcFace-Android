@@ -11,6 +11,8 @@ abstract class FaceRecognitionArcFaceCore : FaceRecognition<FaceTemplateVersionV
 
     override val version: FaceTemplateVersionV24 = FaceTemplateVersionV24
 
+    override val defaultThreshold: Float = 6.8f
+
     override suspend fun compareFaceRecognitionTemplates(
         faceRecognitionTemplates: List<FaceTemplate<FaceTemplateVersionV24, FloatArray>>,
         template: FaceTemplate<FaceTemplateVersionV24, FloatArray>
