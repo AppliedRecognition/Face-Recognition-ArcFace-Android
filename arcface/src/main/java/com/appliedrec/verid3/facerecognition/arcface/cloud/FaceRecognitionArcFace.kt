@@ -22,6 +22,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import kotlin.math.sqrt
 
 class FaceRecognitionArcFace(val apiToken: String, val serverUrl: HttpUrl) : FaceRecognitionArcFaceCore() {
 
@@ -75,7 +76,9 @@ class FaceRecognitionArcFace(val apiToken: String, val serverUrl: HttpUrl) : Fac
             }
             response.body.string()
         }
-        Json.decodeFromString<List<FaceTemplateArcFace>>(body)
+        Json.decodeFromString<List<FaceTemplateArcFace>>(body).map { template ->
+            FaceTemplateArcFace(normalize(template.data))
+        }
     }
 
     private fun bitmapToJpeg(bitmap: Bitmap): ByteArray {
@@ -83,5 +86,14 @@ class FaceRecognitionArcFace(val apiToken: String, val serverUrl: HttpUrl) : Fac
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
             outputStream.toByteArray()
         }
+    }
+
+    private fun normalize(v: FloatArray): FloatArray {
+        val norm = norm(v)
+        return v.map { it / norm }.toFloatArray()
+    }
+
+    private fun norm(v: FloatArray): Float {
+        return sqrt(innerProduct(v, v))
     }
 }

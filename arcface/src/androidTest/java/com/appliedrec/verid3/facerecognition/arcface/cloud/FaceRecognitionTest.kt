@@ -73,6 +73,7 @@ class FaceRecognitionTest {
         val (image, face) = createTestImageAndFace()
         val template = faceRecognition.createFaceRecognitionTemplates(listOf(face), image).first()
         assertEquals(128, template.data.size)
+        assertEquals(1f, norm(template.data), 0.01f)
         mockWebServer.shutdown()
     }
 
@@ -82,6 +83,7 @@ class FaceRecognitionTest {
         val (image, face) = createTestImageAndFace()
         val template = faceRecognition.createFaceRecognitionTemplates(listOf(face), image).first()
         assertEquals(128, template.data.size)
+        assertEquals(1f, norm(template.data), 0.01f)
     }
 
     @Test
@@ -89,10 +91,9 @@ class FaceRecognitionTest {
         val challengeFace = FaceTemplateArcFace(generateRandomFaceTemplate())
         val users: Array<Pair<String, FaceTemplateArcFace>> = arrayOf(
             "user1" to FaceTemplateArcFace(generateRandomFaceTemplate()),
-            "user2" to FaceTemplateArcFace(generateFaceTemplateSimilarTo(challengeFace.data, 0.8f)),
+            "user2" to FaceTemplateArcFace(generateFaceTemplateSimilarTo(challengeFace.data, 0.9f)),
             "user3" to FaceTemplateArcFace(generateRandomFaceTemplate()),
         )
-        val threshold = 0.5f
         // 1. Create FaceRecognition instance
         val faceRecognition = createFaceRecognition()
         // 2. Compare registered user faces to the challenge face
@@ -103,7 +104,7 @@ class FaceRecognitionTest {
         val result = scores
             .asList() // Convert scores array to list
             .mapIndexedNotNull { index, score ->
-                if (score < threshold) {
+                if (score < faceRecognition.defaultThreshold) {
                     null // Ignore element if score doesn't match the threshold
                 } else {
                     users[index].first to score // Return user/score pair
