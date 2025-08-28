@@ -11,33 +11,32 @@ abstract class FaceRecognitionArcFaceCore : FaceRecognition<FaceTemplateVersionV
 
     override val version: FaceTemplateVersionV24 = FaceTemplateVersionV24
 
-    override val defaultThreshold: Float = 0.65f
+    override val defaultThreshold: Float = 0.8f
 
     override suspend fun compareFaceRecognitionTemplates(
         faceRecognitionTemplates: List<FaceTemplate<FaceTemplateVersionV24, FloatArray>>,
         template: FaceTemplate<FaceTemplateVersionV24, FloatArray>
     ): FloatArray = coroutineScope {
-        require(faceRecognitionTemplates.all { it.data.size == template.data.size }) { "Face recognition templates must have the same length" }
-        val data1 = template.data
-        val norm1 = norm(data1)
-        val templateData = faceRecognitionTemplates.map { it.data }
-        val chunks = templateData.chunked(100)
-        val scores = chunks.map { chunk ->
-            async {
-                chunk.map { data2 ->
-                    val norm2 = norm(data2)
-                    innerProduct(data1, data2) / (norm1 * norm2)
+        require(faceRecognitionTemplates.all { it.data.size == template.data.size }) {
+            "Face recognition templates must have the same length"
+        }
+        val a = template.data
+        faceRecognitionTemplates.map { it.data }
+            .chunked(100)
+            .map { chunk ->
+                async {
+                    FloatArray(chunk.size) { idx ->
+                        val b = chunk[idx]
+                        val cos = innerProduct(a, b)
+                        ((cos + 1f) * 0.5f).coerceIn(0f, 1f)
+                    }
                 }
             }
-        }.awaitAll().flatten().toFloatArray()
-        return@coroutineScope scores
+            .awaitAll()
+            .reduce { acc, arr -> acc + arr }
     }
 
-    private fun innerProduct(v1: FloatArray, v2: FloatArray): Float {
+    protected fun innerProduct(v1: FloatArray, v2: FloatArray): Float {
         return v1.zip(v2) { a, b -> a * b }.sum()
-    }
-
-    private fun norm(v: FloatArray): Float {
-        return sqrt(innerProduct(v, v))
     }
 }
