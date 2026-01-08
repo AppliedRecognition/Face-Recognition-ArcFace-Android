@@ -11,7 +11,7 @@ abstract class FaceRecognitionArcFaceCore : FaceRecognition<FaceTemplateVersionV
 
     override val version: FaceTemplateVersionV24 = FaceTemplateVersionV24
 
-    override val defaultThreshold: Float = 0.8f
+    override val defaultThreshold: Float = 0.6f
 
     override suspend fun compareFaceRecognitionTemplates(
         faceRecognitionTemplates: List<FaceTemplate<FaceTemplateVersionV24, FloatArray>>,
@@ -28,7 +28,7 @@ abstract class FaceRecognitionArcFaceCore : FaceRecognition<FaceTemplateVersionV
                     FloatArray(chunk.size) { idx ->
                         val b = chunk[idx]
                         val cos = innerProduct(a, b)
-                        ((cos + 1f) * 0.5f).coerceIn(0f, 1f)
+                        cos.coerceIn(0f, 1f)
                     }
                 }
             }

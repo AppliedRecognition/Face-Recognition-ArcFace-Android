@@ -1,0 +1,1 @@
+sourceset_dependencies = '{":arcface-core/debug":[],":arcface-core/main":[],":arcface-core/release":[],":arcface/debug":[],":arcface/main":[],":arcface/release":[]}'

@@ -1,5 +1,5 @@
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.dokka.gradle.DokkaTaskPartial
 
 plugins {
     alias(libs.plugins.android.library)
@@ -10,7 +10,7 @@ plugins {
     signing
 }
 
-version = "1.1.2"
+version = "1.1.3"
 
 android {
     namespace = "com.appliedrec.verid3.facerecognition.arcface.core"
@@ -29,7 +29,7 @@ android {
             }
         }
         ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
+            abiFilters += listOf("arm64-v8a", "x86_64", "armeabi-v7a", "x86")
         }
     }
 
@@ -104,7 +104,7 @@ signing {
     sign(publishing.publications)
 }
 
-tasks.withType<DokkaTask>().configureEach {
+tasks.withType<DokkaTaskPartial>().configureEach {
     moduleName.set("Face recognition ArcFace core")
     moduleVersion.set(project.version.toString())
 }

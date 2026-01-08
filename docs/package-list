@@ -1,0 +1,7 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+
+module:arcface
+com.appliedrec.verid3.facerecognition.arcface.cloud
+module:arcface-core
+com.appliedrec.verid3.facerecognition.arcface.core
