@@ -10,7 +10,7 @@ plugins {
     signing
 }
 
-version = "1.1.2"
+version = "1.1.3"
 
 android {
     namespace = "com.appliedrec.verid3.facerecognition.arcface.core"
