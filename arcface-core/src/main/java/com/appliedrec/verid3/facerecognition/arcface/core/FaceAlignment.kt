@@ -15,9 +15,11 @@ class FaceAlignment {
      *
      * @param image Image with the face
      * @param face Face to align
+     * @param scale
+     * @param verticalOffset
      * @return Image with the aligned face
      */
-    fun alignFace(image: Bitmap, face: Face): Bitmap {
+    fun alignFace(image: Bitmap, face: Face, scale: Double = 2.85, verticalOffset: Double = 0.4): Bitmap {
         require(face.noseTip != null) {
             "Missing nose coordinate"
         }
@@ -31,7 +33,7 @@ class FaceAlignment {
         } else {
             landmarks.add(face.mouthCentre!!)
         }
-        return alignFace(image, landmarks.toTypedArray())
+        return alignFace(image, landmarks.toTypedArray(), scale, verticalOffset)
     }
 
     /**
@@ -50,7 +52,9 @@ class FaceAlignment {
      *  2. Right eye
      *  3. Nose tip
      *  4. Mouth centre
+     * @param scale
+     * @param verticalOffset
      * @return Image with the aligned face
      */
-    external fun alignFace(image: Bitmap, landmarks: Array<PointF>): Bitmap
+    external fun alignFace(image: Bitmap, landmarks: Array<PointF>, scale: Double, verticalOffset: Double): Bitmap
 }
